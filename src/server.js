@@ -16,6 +16,24 @@ app.get("/", (req, res) => {
   res.sendFile(path.resolve(__dirname, "..", "public", "index.html"));
 });
 
+app.get("/list-videos", (req, res) => {
+  const filenames = fs.readdirSync(CONFIG.VIDEO_DIRECTORY);
+  const supportedFilesExtensions = Object.keys(CONFIG.VIDEO_MIME_TYPES_MAPPING);
+  console.log(filenames);
+  const filteredFilenames = filenames.filter((file) => {
+    const match = file.match(/.+\.(\w+?)$/);
+    if (match && match.length >= 2) {
+      return supportedFilesExtensions.indexOf(match[1]) >= 0;
+    }
+    return false;
+  });
+
+  res.status(200).send({
+    status: "success",
+    response: filteredFilenames,
+  });
+});
+
 app.get("/video", (req, res) => {
   const range = req.headers.range;
   if (!range) {
