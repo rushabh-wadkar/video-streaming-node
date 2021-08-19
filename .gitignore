@@ -131,4 +131,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# End of https://www.toptal.com/developers/gitignore/api/node
+# ignore videos big files
+videos/*
