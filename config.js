@@ -14,6 +14,7 @@ const VIDEO_MIME_TYPES_MAPPING = {
   webm: "video/webm",
   wmv: "video/x-ms-wmv",
   wmv: "video/x-msvideo",
+  mov: "video/quicktime",
 };
 
 module.exports = {
