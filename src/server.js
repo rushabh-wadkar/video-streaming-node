@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const CONFIG = require("../config.js");
 
 // Initializing the app
 const app = express();
@@ -21,12 +22,12 @@ app.get("/video", (req, res) => {
     res.status(400).send("Requires range in headers");
   }
 
-  const videoPath = "./videos/sample.mp4";
+  const videoPath = CONFIG.VIDEO_DIRECTORY + "/sample.mp4";
   const videoSize = fs.statSync(videoPath).size;
 
   // Parse Range
   // Example: "bytes=3232-"
-  const CHUNK_SIZE = 10 ** 6; // 1 MB
+  const CHUNK_SIZE = CONFIG.VIDEO_STREAM_CHUNK_SIZE; // 1 MB
   const start = Number(range.replace(/\D/g, ""));
   const end = Math.min(videoSize - 1, start + CHUNK_SIZE);
 
