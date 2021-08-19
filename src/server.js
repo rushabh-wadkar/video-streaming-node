@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const CONFIG = require("../config.js");
+const Videos_MIME_Mapper = CONFIG.VIDEO_MIME_TYPES_MAPPING || {};
 
 // Initializing the app
 const app = express();
@@ -18,30 +19,46 @@ app.get("/", (req, res) => {
 
 app.get("/list-videos", (req, res) => {
   const filenames = fs.readdirSync(CONFIG.VIDEO_DIRECTORY);
-  const supportedFilesExtensions = Object.keys(CONFIG.VIDEO_MIME_TYPES_MAPPING);
-  console.log(filenames);
-  const filteredFilenames = filenames.filter((file) => {
+
+  const output = [];
+  filenames.forEach((file) => {
     const match = file.match(/.+\.(\w+?)$/);
-    if (match && match.length >= 2) {
-      return supportedFilesExtensions.indexOf(match[1]) >= 0;
+    if (
+      match &&
+      match.length >= 2 &&
+      Videos_MIME_Mapper.hasOwnProperty(match[1])
+    ) {
+      output.push({
+        file,
+        extn: match[1],
+        mime: Videos_MIME_Mapper[match[1]],
+      });
     }
-    return false;
   });
 
   res.status(200).send({
     status: "success",
-    response: filteredFilenames,
+    data: output,
   });
 });
 
-app.get("/video", (req, res) => {
+app.get("/video/:filename", (req, res) => {
+  const { filename } = req.params;
   const range = req.headers.range;
   if (!range) {
-    res.status(400).send("Requires range in headers");
+    res.sendFile(path.resolve(__dirname, "..", "public", "index.html"));
+    return;
   }
 
-  const videoPath = CONFIG.VIDEO_DIRECTORY + "/sample.mp4";
+  const videoPath = CONFIG.VIDEO_DIRECTORY + "/" + filename;
   const videoSize = fs.statSync(videoPath).size;
+
+  // get mime type
+  let mime__type = "video/mp4";
+  const match = filename.match(/.+\.(\w+?)$/);
+  if (match && match.length >= 2) {
+    mime__type = Videos_MIME_Mapper[match[1]];
+  }
 
   // Parse Range
   // Example: "bytes=3232-"
@@ -51,7 +68,7 @@ app.get("/video", (req, res) => {
 
   // Create headers
   const headers = {
-    "Content-Type": "video/mp4",
+    "Content-Type": mime__type,
     "Content-Range": `bytes ${start}-${end}/${videoSize}`,
     "Accept-Ranges": "bytes",
     "Content-Length": end - start + 1,

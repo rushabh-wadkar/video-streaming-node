@@ -21,7 +21,7 @@ body {
   color: var(--font-color);
   max-width: 90%;
   margin: 0 auto;
-  font-size: calc(1rem + 0.25vh);
+  /* font-size: calc(1rem + 0.25vh); */
 }
 
 h1 {
@@ -119,4 +119,5 @@ input:checked + .slider:before {
 
 video {
   width: 100%;
+  height: auto;
 }
